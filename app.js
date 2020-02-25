@@ -1,18 +1,15 @@
 const express = require('express');
 
+const userRouter = require('./routes/userRoutes');
+
 const app = express();
 
-app.use('/api/v1/main', (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-    data: {
-      person: 'John Jenkins',
-      id: 2,
-      age: 25,
-      color: 'white',
-      party: 'Respublican'
-    }
-  });
-});
+// MIDDLEWARE //
+
+// Body parser, reading data from the body into req.body
+app.use(express.json());
+
+// ROUTES //
+app.use('/api/v1/users', userRouter);
 
 module.exports = app;
