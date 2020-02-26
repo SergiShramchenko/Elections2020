@@ -36,7 +36,8 @@ const userSchema = mongoose.Schema({
   password: {
     type: String,
     required: [true, `Please add password. This field can't be empty `],
-    minlength: 8
+    minlength: 8,
+    select: false
   },
   passwordConfirm: {
     type: String,
@@ -82,7 +83,7 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
   return false;
 };
 
-userSchema.methods.changedPassworResetToken = function() {
+userSchema.methods.createPasswordResetToken = function() {
   const resetToken = crypto.randomBytes(32).toString('hex');
 
   this.passwordResetToken = crypto

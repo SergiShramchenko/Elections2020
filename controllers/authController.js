@@ -31,7 +31,7 @@ exports.protect = catchAsyncError(async (req, res, next) => {
 
   if (
     req.headers.authorization &&
-    req.headers.authorization.starsWith('Bearer')
+    req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
   }
@@ -136,7 +136,7 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
   createAndSendToken(user, 201, res);
 });
 
-exports.updaPassword = catchAsyncError(async (req, res, next) => {
+exports.updatePassword = catchAsyncError(async (req, res, next) => {
   const user = await User.findById(req.user.id).select('+password');
 
   if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
