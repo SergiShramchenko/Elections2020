@@ -6,6 +6,7 @@ const AppError = require('../utils/appError');
 const createAndSendToken = require('../utils/token-functions/createAndSendToken');
 const createNewUser = require('../utils/createNewUser');
 const catchAsyncError = require('../utils/catchAsyncError');
+const sendEmail = require('../utils/sendEmail');
 
 exports.signup = catchAsyncError(async (req, res, next) =>
   createAndSendToken(await createNewUser(req), 201, res)
@@ -74,14 +75,15 @@ exports.checkPermission = (...status) => {
 };
 
 exports.forgotPassword = catchAsyncError(async (req, res, next) => {
-  const user = User.findOne({ email: req.body.email });
+  const user = await User.findOne({ email: req.body.email });
+  console.log(user);
 
   if (!user) {
     return next(new AppError('There is no user with email address', 404));
   }
 
   const resetToken = user.createPasswordResetToken();
-  await (await user).save({ validateBeforeSave: false });
+  await user.save({ validateBeforeSave: false });
 
   const resetURL = `${req.protocol}://${req.get(
     'host'
@@ -97,11 +99,13 @@ exports.forgotPassword = catchAsyncError(async (req, res, next) => {
       subject: 'Your password reset token (valid for 10 min)',
       message
     });
+
     res.status(200).json({
       status: 'success',
       message: 'Token sent to email'
     });
   } catch (err) {
+    console.log(err);
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
@@ -139,7 +143,9 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
 exports.updatePassword = catchAsyncError(async (req, res, next) => {
   const user = await User.findById(req.user.id).select('+password');
 
-  if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
+  if (
+    !(await user.isPasswordCorrect(req.body.passwordCurrent, user.password))
+  ) {
     return next(new AppError('Your current password is wrong'), 401);
   }
 

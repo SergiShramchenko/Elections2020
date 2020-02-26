@@ -1,6 +1,7 @@
 const express = require('express');
 
 const userRouter = require('./routes/userRoutes');
+const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
 
@@ -11,5 +12,8 @@ app.use(express.json());
 
 // ROUTES //
 app.use('/api/v1/users', userRouter);
+
+// GLOBAL ERROR HANDLER //
+app.use(globalErrorHandler);
 
 module.exports = app;

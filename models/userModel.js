@@ -30,7 +30,7 @@ const userSchema = mongoose.Schema({
   },
   status: {
     type: String,
-    role: ['user', 'editor', 'admin'],
+    enum: ['user', 'editor', 'admin'],
     default: 'user'
   },
   password: {
@@ -41,9 +41,23 @@ const userSchema = mongoose.Schema({
   },
   passwordConfirm: {
     type: String,
-    required: [true, 'Please confirm your password']
+    required: [true, 'Please confirm your password'],
+    select: false,
+    validate: {
+      validator: function(el) {
+        return el === this.password;
+      },
+      message: 'Password are not the same!'
+    }
   },
-  accountCreatedAt: Date
+  accountCreatedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date,
+  activeAccount: {
+    type: Boolean,
+    default: true,
+    select: true
+  }
 });
 
 userSchema.pre('save', async function(next) {
@@ -60,7 +74,13 @@ userSchema.pre('save', async function(next) {
 userSchema.pre('save', function(next) {
   if (!this.isModified('password') || this.isNew) return next();
 
-  this.passwordConfirm = Date.now() - 1000;
+  this.passwordChangeAt = Date.now() - 1000;
+  next();
+});
+
+userSchema.pre(/^find/, function(next) {
+  // this points to the current query
+  this.find({ activeAccount: { $ne: false } });
   next();
 });
 
@@ -90,6 +110,8 @@ userSchema.methods.createPasswordResetToken = function() {
     .createHash('sha256')
     .update(resetToken)
     .digest('hex');
+
+  console.log({ resetToken }, this.passwordResetToken);
 
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 
