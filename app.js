@@ -7,6 +7,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 
 const userRouter = require('./routes/userRoutes');
+const voteRouter = require('./routes/voteRoutes');
 const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
@@ -41,6 +42,7 @@ app.use(express.static(`${__dirname}/public`));
 
 // ROUTES //
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/vote', voteRouter);
 
 // GLOBAL ERROR HANDLER //
 app.use(globalErrorHandler);

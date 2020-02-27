@@ -28,6 +28,6 @@ const personSchema = new mongoose.Schema({
   }
 });
 
-const Person = mongoose.model('Person', personSchema);
+const PersonVote = mongoose.model('PersonVote', personSchema);
 
-module.exports = Person;
+module.exports = PersonVote;
